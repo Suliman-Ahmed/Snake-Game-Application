@@ -25,7 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   shared_preferences: ^0.5.7+3
   audioplayers: ^0.13.2
-  admob_flutter: ^0.3.4
+  toast: ^0.1.5
 
 dev_dependencies:
   flutter_test:
@@ -44,8 +44,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #  - images/a_dot_burr.jpeg
+  assets:
+    - assets/img/
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -59,10 +59,10 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: ARCADECLASSIC
+      fonts:
+        - asset: assets/fonts/ARCADECLASSIC.TTF
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

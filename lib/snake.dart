@@ -6,8 +6,13 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snakegame/snake_colors.dart';
 
 class Snake extends StatefulWidget {
+  final SnakeColors snakeColor;
+
+  Snake(this.snakeColor);
+
   @override
   _SnakeState createState() => _SnakeState();
 }
@@ -32,37 +37,73 @@ class _SnakeState extends State<Snake> {
   }
 
   static List<int> snakePosition = [92, 93, 94, 95, 96];
-  int numOfSeqers = 360;
+  int numOfSeqers = 315;
 
   bool isPlaying = false;
+  bool isStop = false;
 
   static var randomNum = Random();
   int food = randomNum.nextInt(200);
   var duration;
-  List<int> blocks = List<int>(5);
+  List<int> bombs = [20, 30, 50, 80, 90];
 
   int score = 0;
   int durationTime = 300;
   int col = 0;
 
+  var timers;
+
   void generateNewFood() {
-    food = randomNum.nextInt(numOfSeqers);
+    food = randomNum.nextInt(numOfSeqers - 45);
+    if (snakePosition.contains(food) || bombs.contains(food)) {
+      generateNewFood();
+    }
+  }
+
+  void checkBombs() {
+    for (int i = 0; i < bombs.length; i++) {
+      if (food == bombs[i]) {
+        bombs[i] = randomNum.nextInt(numOfSeqers);
+      }
+    }
+  }
+
+  void generateBombs() {
+    for (int i = 0; i < bombs.length; i++) {
+      bombs[i] = randomNum.nextInt(numOfSeqers);
+    }
+  }
+
+  int bombIndex = 0;
+  void generateLastBomb(){
+    bombs[bombIndex] = randomNum.nextInt(numOfSeqers);
   }
 
   void startGame() {
     score = 0;
     isPlaying = true;
     direction = 'right';
+    durationTime = 300;
     generateNewFood();
+    generateBombs();
     snakePosition = [92, 93, 94, 95, 96];
-    duration = Duration(milliseconds: 300);
+    duration = Duration(milliseconds: durationTime);
     Timer.periodic(duration, (Timer timer) {
       updateSnake();
-      if (_gameOver()) {
+      if (_gameOver(false)) {
         timer.cancel();
         _showGameOverScreen();
       }
     });
+  }
+
+  void stopGame() {
+    setState(() {
+      isPlaying = false;
+      durationTime = 9000;
+    });
+    snakePosition = [92, 93, 94, 95, 96];
+    duration = Duration(milliseconds: durationTime);
   }
 
   var direction = 'down';
@@ -71,14 +112,14 @@ class _SnakeState extends State<Snake> {
     setState(() {
       switch (direction) {
         case 'down':
-          if (snakePosition.last > numOfSeqers - 11) {
+          if (snakePosition.last > numOfSeqers) {
             snakePosition.add(snakePosition.last - numOfSeqers);
           } else {
             snakePosition.add(snakePosition.last + 15);
           }
           break;
         case 'up':
-          if (snakePosition.last < 16) {
+          if (snakePosition.last < 5) {
             snakePosition.add(snakePosition.last + numOfSeqers);
           } else {
             snakePosition.add(snakePosition.last - 15);
@@ -97,7 +138,6 @@ class _SnakeState extends State<Snake> {
           } else {
             snakePosition.add(snakePosition.last + 1);
           }
-
           break;
 
         default:
@@ -107,11 +147,13 @@ class _SnakeState extends State<Snake> {
         generateNewFood();
         score = snakePosition.length - 5;
         eatSound();
+        bombIndex++;
+        (bombIndex > 5) ? bombIndex = 0 : bombIndex = bombIndex;
+        (score!= 0 && score % 5 == 0) ? generateLastBomb() : print('no bomb');
         if (score % 2 == 0) {
           durationTime -= 10;
           if (durationTime > 0) {
             duration = Duration(milliseconds: durationTime);
-            setState(() {});
           }
         }
       } else {
@@ -132,7 +174,16 @@ class _SnakeState extends State<Snake> {
     return await cache.play("img/$url.mp3");
   }
 
-  bool _gameOver() {
+  bool _gameOver(bool isPlay) {
+    if (isPlay == true) {
+      return true;
+    }
+    for (int j = 0; j < bombs.length; j++) {
+      if (snakePosition.last == bombs[j]) {
+        return true;
+      }
+    }
+
     for (int i = 0; i < snakePosition.length; i++) {
       int count = 0;
       for (int j = 0; j < snakePosition.length; j++) {
@@ -150,6 +201,7 @@ class _SnakeState extends State<Snake> {
   void _showGameOverScreen() {
     moveSound('crash_sound');
     isPlaying = false;
+    bombIndex = 0;
     if (score > highScore) {
       highScore = score;
       sharedPreferences.setInt('HighScore', score);
@@ -178,28 +230,39 @@ class _SnakeState extends State<Snake> {
   Widget build(BuildContext context) {
     double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
-    sharedPreferences.setInt('HighScore', 1);
+
+    int size1 = (_height ~/ 2).toInt();
+    for (int i = 0; i < 10; i++) {
+      if (size1 % 15 != 0) {
+        size1 -= ((_height / 2) % 15).toInt();
+      } else {
+        break;
+      }
+    }
+    numOfSeqers = size1;
     return Scaffold(
-      backgroundColor: Color(0xffa8d04b),
+      backgroundColor: widget.snakeColor.seqColor1,
       appBar: AppBar(
-        backgroundColor: Color(0xffa8d04b),
+        backgroundColor: widget.snakeColor.color,
         elevation: .5,
-        leading: Center(child: Text('High Score $highScore')),
-        centerTitle: true,
-        actions: <Widget>[
-          Center(
-            child: InkWell(
-              onTap: () {
-                startGame();
-              },
-              child: Text(
-                'START',
-                style: TextStyle(fontSize: 15, color: Colors.white),
-              ),
-            ),
+        leading: Center(
+            child: Text(
+          'High Score $highScore',
+          style: TextStyle(
+            color: (widget.snakeColor.color == Colors.white)
+                ? Colors.black
+                : Colors.white,
           ),
-        ],
-        title: Text('Score $score'),
+        )),
+        centerTitle: true,
+        title: Text(
+          'Score $score',
+          style: TextStyle(
+            color: (widget.snakeColor.color == Colors.white)
+                ? Colors.black
+                : Colors.white,
+          ),
+        ),
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -231,11 +294,9 @@ class _SnakeState extends State<Snake> {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: numOfSeqers,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 15),
+                    crossAxisCount: 15,
+                  ),
                   itemBuilder: (BuildContext context, int index) {
-//                    index = colIndex;
-
-//                    print(colIndex);
                     if (snakePosition.contains(index)) {
                       return Center(
                         child: Container(
@@ -243,8 +304,26 @@ class _SnakeState extends State<Snake> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(5),
                             child: Container(
-                              color: Color(0xff5076f9),
+                              decoration: BoxDecoration(
+                                  color: widget.snakeColor.color,
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                      color: Colors.black, width: .5)),
                             ),
+                          ),
+                        ),
+                      );
+                    }
+                    if (bombs.contains(index)) {
+                      return Container(
+                        padding: EdgeInsets.all(2),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(widget.snakeColor.bomb),
+                                    fit: BoxFit.fitHeight)),
                           ),
                         ),
                       );
@@ -257,7 +336,7 @@ class _SnakeState extends State<Snake> {
                           child: Container(
                             decoration: BoxDecoration(
                                 image: DecorationImage(
-                                    image: AssetImage('assets/img/apple.png'),
+                                    image: AssetImage(widget.snakeColor.food),
                                     fit: BoxFit.fitHeight)),
                           ),
                         ),
@@ -269,52 +348,33 @@ class _SnakeState extends State<Snake> {
 //                      if (col > 17) col = 0;
                       return Container(
                         child: Container(
-                            color:
+                          color:
 //                            (colIndex % 2 == 0)
 //                                ? (index % 2 == 0)
 //                                ? Color(0xff8ecc39)
 //                                : Color(0xffa8d04b)
 //                                : !
-                                (index % 2 == 0)
-                                    ? Color(0xff8ecc39)
-                                    : Color(0xffa8d04b)),
+                              (index % 2 == 0)
+                                  ? widget.snakeColor.seqColor1
+                                  : widget.snakeColor.seqColor2
+                        ),
                       );
                     }
                   }),
             ),
           ),
 
-          /*
-           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child:isPlaying ? SizedBox() : Container(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      startGame();
-                    },
-                    child: Text(
-                      'S T A R T',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    ),
-                  ),
-                  Text(
-                    'Score = $score',
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                  Text(
-                    'High Score = $highScore',
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          */
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            isStop = !isStop;
+          });
+          isStop ? startGame() : stopGame();
+        },
+        child: Icon(isStop ? Icons.pause : Icons.play_arrow,color: widget.snakeColor.textColor,),
+        backgroundColor: widget.snakeColor.color,
       ),
     );
   }
