@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snakegame/snake.dart';
 import 'package:snakegame/snake_colors.dart';
 import 'package:toast/toast.dart';

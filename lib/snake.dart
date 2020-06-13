@@ -89,7 +89,7 @@ class _SnakeState extends State<Snake> {
     snakePosition = [92, 93, 94, 95, 96];
     duration = Duration(milliseconds: durationTime);
     Timer.periodic(duration, (Timer timer) {
-      updateSnake();
+      isStop ? updateSnake() : print('Stop');
       if (_gameOver(false)) {
         timer.cancel();
         _showGameOverScreen();
@@ -371,7 +371,7 @@ class _SnakeState extends State<Snake> {
           setState(() {
             isStop = !isStop;
           });
-          isStop ? startGame() : stopGame();
+          (isStop && !isPlaying) ? startGame() : print('Stop');
         },
         child: Icon(isStop ? Icons.pause : Icons.play_arrow,color: widget.snakeColor.textColor,),
         backgroundColor: widget.snakeColor.color,
