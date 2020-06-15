@@ -82,6 +82,16 @@ class _HomePageState extends State<HomePage> {
       seqColor2: Color(0xff2F4858),
         backgroundImage: 'assets/img/backgroundImage5.png'
     ),
+    SnakeColors(
+        name: 'Pink 2',
+        food: 'assets/img/cherry.png',
+        bomb: 'assets/img/bomb.png',
+        color: Color(0xffd26481),
+        textColor: Colors.white,
+        seqColor1: Color(0xff8ecc39),
+        seqColor2: Color(0xffa8d04b),
+        backgroundImage: 'assets/img/backgroundImage6.png'
+    ),
   ];
 
   SnakeColors selectedColor;

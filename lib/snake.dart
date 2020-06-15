@@ -60,14 +60,6 @@ class _SnakeState extends State<Snake> {
     }
   }
 
-  void checkBombs() {
-    for (int i = 0; i < bombs.length; i++) {
-      if (food == bombs[i]) {
-        bombs[i] = randomNum.nextInt(numOfSeqers);
-      }
-    }
-  }
-
   void generateBombs() {
     for (int i = 0; i < bombs.length; i++) {
       bombs[i] = randomNum.nextInt(numOfSeqers);
@@ -228,7 +220,6 @@ class _SnakeState extends State<Snake> {
 
   @override
   Widget build(BuildContext context) {
-    double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
 
     int size1 = (_height ~/ 2).toInt();
@@ -342,18 +333,9 @@ class _SnakeState extends State<Snake> {
                         ),
                       );
                     } else {
-//                      if (index % 10 == 0) {
-//                        colIndex += 1;
-//                      }
-//                      if (col > 17) col = 0;
                       return Container(
                         child: Container(
                           color:
-//                            (colIndex % 2 == 0)
-//                                ? (index % 2 == 0)
-//                                ? Color(0xff8ecc39)
-//                                : Color(0xffa8d04b)
-//                                : !
                               (index % 2 == 0)
                                   ? widget.snakeColor.seqColor1
                                   : widget.snakeColor.seqColor2
